@@ -29,7 +29,7 @@ type
     procedure Open(const ServerName:string;Port:integer=28015);
     procedure Close;
 
-    procedure Query(const Request:TQuery; const Response:TResponse);
+    procedure Run(const Request:TQuery; const Response:TResponse);
 
     property AuthKey:UTF8String read FAuthKey write FAuthKey;
   end;
@@ -39,6 +39,8 @@ type
   ERethinkNotConnected=class(ERethinkException);
   ERethinkTransferError=class(ERethinkException);
   ERethinkQueryError=class(ERethinkException);
+
+procedure CheckRes(const Res: TResponse);
 
 function r(b:boolean):TDatum; overload;
 function r(d:double):TDatum; overload;
@@ -131,7 +133,7 @@ begin
   FSocket.Close;
 end;
 
-procedure TRethinkWire.Query(const Request: TQuery; const Response: TResponse);
+procedure TRethinkWire.Run(const Request: TQuery; const Response: TResponse);
 type
   TBArr=array[0..0] of byte;
   PBArr=^TBArr;
@@ -141,6 +143,7 @@ begin
   FWriteLock.Enter;
   try
     //send request
+    //TODO: set Request.token here?
     FData.Position:=4;
     Request.SaveToStream(FData);
     l:=FData.Position-4;
@@ -174,6 +177,29 @@ begin
   finally
     FWriteLock.Leave;
   end;
+end;
+
+{  }
+
+procedure CheckRes(const Res: TResponse);
+var
+  s:string;
+  i:integer;
+begin
+  if Res.type_>=ResponseType_CLIENT_ERROR then
+   begin
+    s:='';
+    for i:=0 to Res.responseCount-1 do
+     begin
+      case Res.response[i].type_ of
+        DatumType_R_STR:s:=s+Res.response[i].r_str+' ';
+        DatumType_R_NUM:s:=s+FloatToStr(Res.response[i].r_num)+' ';
+        //TODO
+        else s:=s+'??? ';
+      end;
+     end;
+    raise ERethinkQueryError.Create(Trim(s));
+   end;
 end;
 
 { r }
