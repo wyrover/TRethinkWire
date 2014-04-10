@@ -21,7 +21,6 @@ type
     FSocket:TTcpClient;
     FData:TMemoryStream;
     FWriteLock,FReadLock:TCriticalSection;
-    FToken:int64;
     FAuthKey:UTF8String;
   public
     constructor Create;
@@ -41,6 +40,10 @@ type
   ERethinkTransferError=class(ERethinkException);
   ERethinkQueryError=class(ERethinkException);
 
+function r(b:boolean):TDatum; overload;
+function r(d:double):TDatum; overload;
+function r(const s:string):TDatum; overload;
+
 implementation
 
 uses WinSock;
@@ -54,7 +57,6 @@ begin
   FData:=TMemoryStream.Create;
   FWriteLock:=TCriticalSection.Create;
   FReadLock:=TCriticalSection.Create;
-  FToken:=1;//TODO: random?
   FAuthKey:='';
 end;
 
@@ -172,6 +174,29 @@ begin
   finally
     FWriteLock.Leave;
   end;
+end;
+
+{ r }
+
+function r(b:boolean):TDatum; overload;
+begin
+  Result:=TDatum.Create;
+  Result.type_:=DatumType_R_BOOL;
+  Result.r_bool:=b;
+end;
+
+function r(d:double):TDatum; overload;
+begin
+  Result:=TDatum.Create;
+  Result.type_:=DatumType_R_NUM;
+  Result.r_num:=d;
+end;
+
+function r(const s:string):TDatum; overload;
+begin
+  Result:=TDatum.Create;
+  Result.type_:=DatumType_R_STR;
+  Result.r_str:=s;
 end;
 
 end.

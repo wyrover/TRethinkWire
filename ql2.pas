@@ -61,7 +61,7 @@ type
     property accepts_r_json: boolean read Faccepts_r_json write Faccepts_r_json;
     property global_optargs[Index: integer]: TQuery_AssocPair read Getglobal_optargs write Setglobal_optargs;
     property global_optargsCount: integer read Getglobal_optargsCount;
-    procedure Addglobal_optargs(Value: TQuery_AssocPair);
+    procedure Add_global_optargs(Value: TQuery_AssocPair);
   end;
 
   TQuery_AssocPair = class(TProtocolBufferMessage)
@@ -111,7 +111,7 @@ type
     destructor Destroy; override;
     property frames[Index: integer]: TFrame read Getframes write Setframes;
     property framesCount: integer read GetframesCount;
-    procedure Addframes(Value: TFrame);
+    procedure Add_frames(Value: TFrame);
   end;
 
   TResponseType = (
@@ -147,7 +147,7 @@ type
     property token: int64 read Ftoken write Ftoken;
     property response[Index: integer]: TDatum read Getresponse write Setresponse;
     property responseCount: integer read GetresponseCount;
-    procedure Addresponse(Value: TDatum);
+    procedure Add_response(Value: TDatum);
     property backtrace: TBacktrace read Fbacktrace write Fbacktrace;
     property profile: TDatum read Fprofile write Fprofile;
   end;
@@ -191,10 +191,10 @@ type
     property r_str: string read Fr_str write Fr_str;
     property r_array[Index: integer]: TDatum read Getr_array write Setr_array;
     property r_arrayCount: integer read Getr_arrayCount;
-    procedure Addr_array(Value: TDatum);
+    procedure Add_r_array(Value: TDatum);
     property r_object[Index: integer]: TDatum_AssocPair read Getr_object write Setr_object;
     property r_objectCount: integer read Getr_objectCount;
-    procedure Addr_object(Value: TDatum_AssocPair);
+    procedure Add_r_object(Value: TDatum_AssocPair);
   end;
 
   TDatum_AssocPair = class(TProtocolBufferMessage)
@@ -380,10 +380,10 @@ type
     property datum: TDatum read Fdatum write Fdatum;
     property args[Index: integer]: TTerm read Getargs write Setargs;
     property argsCount: integer read GetargsCount;
-    procedure Addargs(Value: TTerm);
+    procedure Add_args(Value: TTerm);
     property optargs[Index: integer]: TTerm_AssocPair read Getoptargs write Setoptargs;
     property optargsCount: integer read GetoptargsCount;
-    procedure Addoptargs(Value: TTerm_AssocPair);
+    procedure Add_optargs(Value: TTerm_AssocPair);
   end;
 
   TTerm_AssocPair = class(TProtocolBufferMessage)
@@ -491,7 +491,7 @@ begin
   Result := Length(Fglobal_optargs);
 end;
 
-procedure TQuery.Addglobal_optargs(Value: TQuery_AssocPair);
+procedure TQuery.Add_global_optargs(Value: TQuery_AssocPair);
 var
   l: integer;
 begin
@@ -603,7 +603,7 @@ begin
   Result := Length(Fframes);
 end;
 
-procedure TBacktrace.Addframes(Value: TFrame);
+procedure TBacktrace.Add_frames(Value: TFrame);
 var
   l: integer;
 begin
@@ -692,7 +692,7 @@ begin
   Result := Length(Fresponse);
 end;
 
-procedure TResponse.Addresponse(Value: TDatum);
+procedure TResponse.Add_response(Value: TDatum);
 var
   l: integer;
 begin
@@ -781,7 +781,7 @@ begin
   Result := Length(Fr_array);
 end;
 
-procedure TDatum.Addr_array(Value: TDatum);
+procedure TDatum.Add_r_array(Value: TDatum);
 var
   l: integer;
 begin
@@ -805,7 +805,7 @@ begin
   Result := Length(Fr_object);
 end;
 
-procedure TDatum.Addr_object(Value: TDatum_AssocPair);
+procedure TDatum.Add_r_object(Value: TDatum_AssocPair);
 var
   l: integer;
 begin
@@ -925,7 +925,7 @@ begin
   Result := Length(Fargs);
 end;
 
-procedure TTerm.Addargs(Value: TTerm);
+procedure TTerm.Add_args(Value: TTerm);
 var
   l: integer;
 begin
@@ -949,7 +949,7 @@ begin
   Result := Length(Foptargs);
 end;
 
-procedure TTerm.Addoptargs(Value: TTerm_AssocPair);
+procedure TTerm.Add_optargs(Value: TTerm_AssocPair);
 var
   l: integer;
 begin
