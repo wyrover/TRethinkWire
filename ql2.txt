@@ -1,0 +1,2 @@
+https://github.com/rethinkdb/rethinkdb/raw/next/src/rdb_protocol/ql2.proto
+https://github.com/rethinkdb/rethinkdb/raw/next/src/rdb_protocol/ql2_extensions.proto
