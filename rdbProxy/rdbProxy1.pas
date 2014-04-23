@@ -142,8 +142,9 @@ begin
     l:=FIn.ReceiveBuf(j,4);
     if l<>4 then raise Exception.Create('x');
     FOut.SendBuf(j,4);
-    f:=TFileStream.Create(FormatDateTime('yyyymmdd_hhnnss_zzz_',Now)+
-      IntToStr(t)+FSuffix+'.bin',fmCreate or fmShareDenyWrite);
+    f:=TFileStream.Create(Format('%s%.3d%s.bin',[
+      FormatDateTime('yyyymmdd_hhnnss_zzz_',Now),t,FSuffix]),
+      fmCreate or fmShareDenyWrite);
     try
       //f.Size:=j;f.Position:=0;
       while j<>0 do

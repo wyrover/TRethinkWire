@@ -3,13 +3,15 @@
 TRethinkWire: RethinkWire.pas
 
 Copyright 2014 Stijn Sanders
-Made available under terms described in file "COPYING"
+Made available under terms described in file "LICENSE"
 https://github.com/stijnsanders/TRethinkWire
 
 }
 unit RethinkWire;
 
 {$R-}
+{$D-}
+{$L-}
 
 interface
 
@@ -22,6 +24,7 @@ type
     FData:TMemoryStream;
     FWriteLock,FReadLock:TCriticalSection;
     FAuthKey:UTF8String;
+    FNextToken:int64;
   public
     constructor Create;
     destructor Destroy; override;
@@ -46,6 +49,8 @@ function r(b:boolean):TDatum; overload;
 function r(d:double):TDatum; overload;
 function r(const s:string):TDatum; overload;
 
+function q(const s:string):TTerm; overload;
+
 implementation
 
 uses WinSock;
@@ -60,6 +65,7 @@ begin
   FWriteLock:=TCriticalSection.Create;
   FReadLock:=TCriticalSection.Create;
   FAuthKey:='';
+  FNextToken:=0;//default, see Open
 end;
 
 destructor TRethinkWire.Destroy;
@@ -112,8 +118,8 @@ begin
     j:=0;
     while (j=0) or (s[j]<>#0) do
      begin
-      i:=i+FSocket.ReceiveBuf(s[i],l-i+1);
-      j:=1;
+      j:=i;
+      inc(i,FSocket.ReceiveBuf(s[i],l-i+1));
       while (j<i) and (s[j]<>#0) do inc(j);
       if j=i then j:=0;
      end;
@@ -123,6 +129,9 @@ begin
       FSocket.Close;
       raise ERethinkConnectFailed.Create('RethinkWire: '+s);
      end;
+
+    //initial values
+    FNextToken:=1;//random? 
   finally
     FWriteLock.Leave;
   end;
@@ -143,7 +152,8 @@ begin
   FWriteLock.Enter;
   try
     //send request
-    //TODO: set Request.token here?
+    Request.token:=FNextToken;
+    inc(FNextToken);
     FData.Position:=4;
     Request.SaveToStream(FData);
     l:=FData.Position-4;
@@ -170,10 +180,14 @@ begin
         raise ERethinkTransferError.Create('Rethink: failed to receive response');
       inc(i,j);
      end;
+
     FData.Position:=0;
     Response.LoadFromStream(FData,l);
+    
+    //TODO: handle responses async (match by token!)
+    if Response.token<>Request.token then
+      raise ERethinkTransferError.Create('Rethink: token mismatch');
 
-    //TODO: check Response.token, read within FReadLock, multipleksss!
   finally
     FWriteLock.Leave;
   end;
@@ -223,6 +237,17 @@ begin
   Result:=TDatum.Create;
   Result.type_:=DatumType_R_STR;
   Result.r_str:=s;
+end;
+
+{ q }
+
+function q(const s:string):TTerm; overload;
+begin
+  Result:=TTerm.Create;
+  Result.type_:=TermType_DATUM;
+  Result.datum:=TDatum.Create;
+  Result.datum.type_:=DatumType_R_STR;
+  Result.datum.r_str:=s;
 end;
 
 end.
